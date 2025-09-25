@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.TickleManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.UserStateManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.LoadingManager;
 import com.liskovsoft.smartyoutubetv2.tv.R;
@@ -257,6 +258,11 @@ public class VideoGridFragment extends GridFragment implements VideoSection {
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Video) {
+                UserStateManager userStateManager = UserStateManager.getInstance(getActivity());
+                if (userStateManager.areCreditsExhausted()) {
+                    Toast.makeText(getActivity(), "Out of credits. Please top up.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 mMainPresenter.onVideoItemClicked((Video) item);
             } else {
                 Toast.makeText(getActivity(), item.toString(), Toast.LENGTH_SHORT).show();
