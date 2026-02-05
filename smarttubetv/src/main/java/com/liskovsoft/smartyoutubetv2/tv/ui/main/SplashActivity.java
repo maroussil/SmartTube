@@ -76,6 +76,7 @@ public class SplashActivity extends MotherActivity implements SplashView {
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
+                // TODO: Replace "your-credit-server.com" with actual credit server URL
                 .url("https://your-credit-server.com/api/v1/check_credits?id=" + userId)
                 .build();
 
