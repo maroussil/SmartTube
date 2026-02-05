@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.view.KeyEvent;
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.ServiceManager;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
 import com.liskovsoft.mediaserviceinterfaces.data.NotificationState;
@@ -132,7 +133,7 @@ public class PlayerUIController extends BasePlayerController {
 
         boolean isHandled = handleBackKey(keyCode) || handleMenuKey(keyCode) ||
                 handleConfirmKey(keyCode) || handleStopKey(keyCode) || handleNumKeys(keyCode) ||
-                handlePlayPauseKey(keyCode) || handleLeftRightSkip(keyCode);
+                handlePlayPauseKey(keyCode) || handleLeftRightSkip(keyCode) || handleUpDownSkip(keyCode);
 
         if (isHandled) {
             return true; // don't show UI
@@ -372,19 +373,24 @@ public class PlayerUIController extends BasePlayerController {
     @Override
     public void onSuggestionItemLongClicked(Video item) {
         VideoMenuPresenter.instance(getContext()).showMenu(item, (videoItem, action) -> {
-            String title = getContext().getString(R.string.action_playback_queue);
-            int id = title.hashCode();
+            if (getPlayer() == null || item.getGroup() == null)
+                return;
 
-            if (action == VideoMenuCallback.ACTION_REMOVE_FROM_QUEUE) {
+            if (action == VideoMenuCallback.ACTION_REMOVE_FROM_QUEUE
+                    || action == VideoMenuCallback.ACTION_REMOVE_FROM_PLAYLIST
+                    || action == VideoMenuCallback.ACTION_REMOVE) {
+                int id = item.getGroup().getId();
                 VideoGroup group = VideoGroup.from(videoItem);
-                group.setTitle(title);
                 group.setId(id);
                 getPlayer().removeSuggestions(group);
             } else if (action == VideoMenuCallback.ACTION_ADD_TO_QUEUE || action == VideoMenuCallback.ACTION_PLAY_NEXT) {
+                String title = getContext().getString(R.string.action_playback_queue);
+                int id = title.hashCode();
                 Video newItem = videoItem.copy();
                 VideoGroup group = VideoGroup.from(newItem, 0);
                 group.setTitle(title);
                 group.setId(id);
+                group.setType(MediaGroup.TYPE_PLAYBACK_QUEUE);
                 newItem.setGroup(group);
                 if (action == VideoMenuCallback.ACTION_PLAY_NEXT) {
                     group.setAction(VideoGroup.ACTION_PREPEND);
@@ -396,6 +402,9 @@ public class PlayerUIController extends BasePlayerController {
     }
 
     private void onDislikeClicked(boolean dislike) {
+        if (getPlayer() == null)
+            return;
+
         getPlayer().setButtonState(R.id.action_thumbs_down, !dislike ? PlayerUI.BUTTON_ON : PlayerUI.BUTTON_OFF);
 
         if (!mIsMetadataLoaded) {
@@ -676,19 +685,29 @@ public class PlayerUIController extends BasePlayerController {
     }
 
     private boolean handleConfirmKey(int keyCode) {
+        if (getPlayer() == null) {
+            return false;
+        }
+
         boolean controlsShown = getPlayer().isOverlayShown();
 
         if (KeyHelpers.isConfirmKey(keyCode) && !controlsShown) {
             switch (getPlayerData().getOKButtonBehavior()) {
-                case PlayerData.ONLY_UI:
+                case PlayerData.OK_ONLY_UI:
                     getPlayer().showOverlay(true);
                     return true; // don't show ui
-                case PlayerData.UI_AND_PAUSE:
+                case PlayerData.OK_UI_AND_PAUSE:
                     // NOP
                     break;
-                case PlayerData.ONLY_PAUSE:
+                case PlayerData.OK_ONLY_PAUSE:
                     getPlayer().setPlayWhenReady(!getPlayer().getPlayWhenReady());
                     return true; // don't show ui
+                //case PlayerData.OK_TOGGLE_SPEED:
+                //    getMainController().onButtonClicked(R.id.action_video_speed,
+                //            getPlayer().getButtonState(R.id.action_video_speed) == PlayerUI.BUTTON_ON ? PlayerUI.BUTTON_ON : PlayerUI.BUTTON_OFF);
+                //    float speed = getPlayerData().getSpeed();
+                //    MessageHelpers.showMessage(getContext(), String.format("%sx", speed));
+                //    return true;
             }
         }
 
@@ -726,7 +745,7 @@ public class PlayerUIController extends BasePlayerController {
     }
 
     private boolean handleLeftRightSkip(int keyCode) {
-        if (getPlayer().isOverlayShown() || getVideo() == null ||
+        if (getPlayer() == null || getPlayer().isOverlayShown() || getVideo() == null ||
                 (getVideo().belongsToShortsGroup() && !getPlayerTweaksData().isQuickSkipShortsEnabled() ||
                 (!getVideo().belongsToShortsGroup() && !getPlayerTweaksData().isQuickSkipVideosEnabled()))) {
             return false;
@@ -745,11 +764,35 @@ public class PlayerUIController extends BasePlayerController {
         return false;
     }
 
+    private boolean handleUpDownSkip(int keyCode) {
+        if (getPlayer() == null || getPlayer().isOverlayShown() || getVideo() == null ||
+                (getVideo().belongsToShortsGroup() && !getPlayerTweaksData().isQuickSkipShortsAltEnabled() ||
+                        (!getVideo().belongsToShortsGroup() && !getPlayerTweaksData().isQuickSkipVideosAltEnabled()))) {
+            return false;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            getMainController().onNextClicked();
+            return true; // hide ui
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+            getMainController().onPreviousClicked();
+            return true; // hide ui
+        }
+
+        return false;
+    }
+
     private interface MediaItemObservable {
         Observable<Void> call(MediaItem item);
     }
 
     private void setPlaylistAddButtonStateCached() {
+        if (getVideo() == null) {
+            return;
+        }
+
         String videoId = getVideo().videoId;
         mPlaylistInfos = null;
         Disposable playlistsInfoAction =
@@ -913,7 +956,7 @@ public class PlayerUIController extends BasePlayerController {
     }
 
     private void onSubscribe(int buttonState) {
-        if (getVideo() == null) {
+        if (getPlayer() == null || getVideo() == null) {
             return;
         }
 
@@ -933,11 +976,17 @@ public class PlayerUIController extends BasePlayerController {
     }
 
     private void applySoundOff(int buttonState) {
+        if (getPlayer() == null) {
+            return;
+        }
+
         if (buttonState == PlayerUI.BUTTON_OFF) {
             mAudioFormat = getPlayer().getAudioFormat();
             getPlayer().setFormat(FormatItem.NO_AUDIO);
+            getPlayerData().setFormat(FormatItem.NO_AUDIO);
         } else {
             getPlayer().setFormat(mAudioFormat);
+            getPlayerData().setFormat(mAudioFormat);
         }
 
         getPlayer().setButtonState(R.id.action_sound_off, buttonState == PlayerUI.BUTTON_OFF ? PlayerUI.BUTTON_ON : PlayerUI.BUTTON_OFF);
@@ -977,7 +1026,7 @@ public class PlayerUIController extends BasePlayerController {
     private int getNextRepeatMode(int buttonState) {
         Integer[] modeList = {PlayerConstants.PLAYBACK_MODE_ALL, PlayerConstants.PLAYBACK_MODE_ONE, PlayerConstants.PLAYBACK_MODE_SHUFFLE,
                 PlayerConstants.PLAYBACK_MODE_LIST, PlayerConstants.PLAYBACK_MODE_REVERSE_LIST, PlayerConstants.PLAYBACK_MODE_PAUSE, PlayerConstants.PLAYBACK_MODE_CLOSE};
-        int nextMode = Helpers.getNextValue(buttonState, modeList);
+        int nextMode = Helpers.getNextValue(modeList, buttonState);
         return nextMode;
     }
 

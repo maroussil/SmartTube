@@ -47,6 +47,9 @@ public class PlayerTweaksData implements ProfileChangeListener {
             PLAYER_BUTTON_LIKE | PLAYER_BUTTON_DISLIKE | PLAYER_BUTTON_ADD_TO_PLAYLIST | PLAYER_BUTTON_PLAY_PAUSE |
             PLAYER_BUTTON_REPEAT_MODE | PLAYER_BUTTON_NEXT | PLAYER_BUTTON_PREVIOUS | PLAYER_BUTTON_HIGH_QUALITY |
             PLAYER_BUTTON_VIDEO_INFO | PLAYER_BUTTON_CHAT;
+    public static final int DNS_TYPE_SYSTEM = GlobalPreferences.DNS_TYPE_SYSTEM;
+    public static final int DNS_TYPE_IPV4 = GlobalPreferences.DNS_TYPE_IPV4;
+    public static final int DNS_TYPE_GOOGLE = GlobalPreferences.DNS_TYPE_GOOGLE;
     @SuppressLint("StaticFieldLeak")
     private static PlayerTweaksData sInstance;
     private final AppPrefs mPrefs;
@@ -92,15 +95,18 @@ public class PlayerTweaksData implements ProfileChangeListener {
     private boolean mIsChapterNotificationEnabled;
     private boolean mIsPlayerUiOnNextEnabled;
     private boolean mIsPlayerAutoVolumeEnabled;
-    private boolean mIsSimplePlayerNavigationEnabled;
+    private boolean mIsSyncRowButtonIndexEnabled;
     private boolean mIsUnsafeAudioFormatsEnabled;
     private boolean mIsLoopShortsEnabled;
     private boolean mIsQuickSkipShortsEnabled;
+    private boolean mIsQuickSkipShortsAltEnabled;
     private boolean mIsQuickSkipVideosEnabled;
+    private boolean mIsQuickSkipVideosAltEnabled;
     private boolean mIsOculusQuestFixEnabled;
     private boolean mIsAudioFocusEnabled;
     private boolean mIsNetworkErrorFixingDisabled;
     private boolean mIsDontResizeVideoToFitDialogEnabled;
+    private boolean mIsSuggestionsHorizontallyScrolled;
     private final Runnable mPersistDataInt = this::persistDataInt;
 
     private PlayerTweaksData(Context context) {
@@ -542,12 +548,12 @@ public class PlayerTweaksData implements ProfileChangeListener {
         persistData();
     }
 
-    public boolean isSimplePlayerNavigationEnabled() {
-        return mIsSimplePlayerNavigationEnabled;
+    public boolean isSyncRowButtonIndexEnabled() {
+        return mIsSyncRowButtonIndexEnabled;
     }
 
-    public void setSimplePlayerNavigationEnabled(boolean enable) {
-        mIsSimplePlayerNavigationEnabled = enable;
+    public void setSyncRowButtonIndexEnabled(boolean enable) {
+        mIsSyncRowButtonIndexEnabled = enable;
         persistData();
     }
 
@@ -565,8 +571,24 @@ public class PlayerTweaksData implements ProfileChangeListener {
     }
 
     public void setQuickSkipShortsEnabled(boolean enable) {
+        resetSkipShortsSettings();
         mIsQuickSkipShortsEnabled = enable;
         persistData();
+    }
+
+    public boolean isQuickSkipShortsAltEnabled() {
+        return mIsQuickSkipShortsAltEnabled;
+    }
+
+    public void setQuickSkipShortsAltEnabled(boolean enable) {
+        resetSkipShortsSettings();
+        mIsQuickSkipShortsAltEnabled = enable;
+        persistData();
+    }
+
+    private void resetSkipShortsSettings() {
+        mIsQuickSkipShortsEnabled = false;
+        mIsQuickSkipShortsAltEnabled = false;
     }
 
     public boolean isQuickSkipVideosEnabled() {
@@ -574,7 +596,35 @@ public class PlayerTweaksData implements ProfileChangeListener {
     }
 
     public void setQuickSkipVideosEnabled(boolean enable) {
+        resetQuickSkipVideosSettings();
         mIsQuickSkipVideosEnabled = enable;
+        persistData();
+    }
+
+    public boolean isQuickSkipVideosAltEnabled() {
+        return mIsQuickSkipVideosAltEnabled;
+    }
+
+    public void setQuickSkipVideosAltEnabled(boolean enable) {
+        resetQuickSkipVideosSettings();
+        mIsQuickSkipVideosAltEnabled = enable;
+        persistData();
+    }
+
+    private void resetQuickSkipVideosSettings() {
+        mIsQuickSkipVideosEnabled = false;
+        mIsQuickSkipVideosAltEnabled = false;
+    }
+
+    public void resetDpadLeftRightSettings() {
+        mIsQuickSkipShortsEnabled = false;
+        mIsQuickSkipVideosEnabled = false;
+        persistData();
+    }
+
+    public void resetDpadUpDownSettings() {
+        mIsQuickSkipShortsAltEnabled = false;
+        mIsQuickSkipVideosAltEnabled = false;
         persistData();
     }
 
@@ -586,12 +636,12 @@ public class PlayerTweaksData implements ProfileChangeListener {
         MediaServiceData.instance().setFormatEnabled(MediaServiceData.FORMATS_EXTENDED_HLS, enable);
     }
 
-    public boolean isIPv4DnsPreferred() {
-        return GlobalPreferences.instance(mPrefs.getContext()).isIPv4DnsPreferred();
+    public int getPreferredDnsType() {
+        return GlobalPreferences.instance(mPrefs.getContext()).getPreferredDnsType();
     }
 
-    public void setIPv4DnsPreferred(boolean prefer) {
-        GlobalPreferences.instance(mPrefs.getContext()).setIPv4DnsPreferred(prefer);
+    public void setPreferredDnsType(int dnsType) {
+        GlobalPreferences.instance(mPrefs.getContext()).setPreferredDnsType(dnsType);
     }
 
     public boolean isNetworkErrorFixingDisabled() {
@@ -609,6 +659,15 @@ public class PlayerTweaksData implements ProfileChangeListener {
 
     public void setDontResizeVideoToFitDialogEnabled(boolean enable) {
         mIsDontResizeVideoToFitDialogEnabled = enable;
+        persistData();
+    }
+
+    public boolean isSuggestionsHorizontallyScrolled() {
+        return mIsSuggestionsHorizontallyScrolled;
+    }
+
+    public void setSuggestionsHorizontallyScrolled(boolean enable) {
+        mIsSuggestionsHorizontallyScrolled = enable;
         persistData();
     }
 
@@ -661,7 +720,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
         mIsBootScreenOffEnabled = Helpers.parseBoolean(split, 38, false);
         mIsPlayerUiOnNextEnabled = Helpers.parseBoolean(split, 39, false);
         mIsPlayerAutoVolumeEnabled = Helpers.parseBoolean(split, 40, true);
-        mIsSimplePlayerNavigationEnabled = Helpers.parseBoolean(split, 41, true);
+        mIsSyncRowButtonIndexEnabled = Helpers.parseBoolean(split, 41, true);
         mIsUnsafeAudioFormatsEnabled = Helpers.parseBoolean(split, 42, true);
         //mIsHighBitrateFormatsEnabled = Helpers.parseBoolean(split, 43, false);
         mIsLoopShortsEnabled = Helpers.parseBoolean(split, 44, true);
@@ -678,6 +737,9 @@ public class PlayerTweaksData implements ProfileChangeListener {
         //mIsPersistentAntiBotFixEnabled = Helpers.parseBoolean(split, 53, false);
         mIsAudioFocusEnabled = Helpers.parseBoolean(split, 54, true);
         mIsDontResizeVideoToFitDialogEnabled = Helpers.parseBoolean(split, 55, false);
+        mIsSuggestionsHorizontallyScrolled = Helpers.parseBoolean(split, 56, false);
+        mIsQuickSkipShortsAltEnabled = Helpers.parseBoolean(split, 57, false);
+        mIsQuickSkipVideosAltEnabled = Helpers.parseBoolean(split, 58, false);
 
         updateDefaultValues();
     }
@@ -701,10 +763,11 @@ public class PlayerTweaksData implements ProfileChangeListener {
                 mIsSpeedButtonOldBehaviorEnabled, mIsButtonLongClickEnabled, mIsLongSpeedListEnabled, mPlayerDataSource, mUnlockAllFormats,
                 mIsDashUrlStreamsForced, mIsSonyFrameDropFixEnabled, mIsBufferOnStreamsDisabled, mIsSectionPlaylistEnabled,
                 mIsScreenOffTimeoutEnabled, mScreenOffTimeoutSec, mIsUIAnimationsEnabled, mIsLikesCounterEnabled, mIsChapterNotificationEnabled,
-                mScreenOffDimmingPercents, mIsBootScreenOffEnabled, mIsPlayerUiOnNextEnabled, mIsPlayerAutoVolumeEnabled, mIsSimplePlayerNavigationEnabled,
+                mScreenOffDimmingPercents, mIsBootScreenOffEnabled, mIsPlayerUiOnNextEnabled, mIsPlayerAutoVolumeEnabled, mIsSyncRowButtonIndexEnabled,
                 mIsUnsafeAudioFormatsEnabled, null, mIsLoopShortsEnabled, mIsQuickSkipShortsEnabled, mIsRememberPositionOfLiveVideosEnabled,
                 mIsOculusQuestFixEnabled, null, mIsExtraLongSpeedListEnabled, mIsQuickSkipVideosEnabled, mIsNetworkErrorFixingDisabled, mIsCommentsPlacedLeft,
-                null, mIsAudioFocusEnabled, mIsDontResizeVideoToFitDialogEnabled
+                null, mIsAudioFocusEnabled, mIsDontResizeVideoToFitDialogEnabled, mIsSuggestionsHorizontallyScrolled,
+                mIsQuickSkipShortsAltEnabled, mIsQuickSkipVideosAltEnabled
                 ));
     }
 

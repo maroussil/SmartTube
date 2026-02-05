@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 
 import com.liskovsoft.googleapi.service.DriveService;
 import com.liskovsoft.googleapi.oauth2.impl.GoogleSignInService;
@@ -12,13 +13,17 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.GoogleSignInPresenter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
-import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -35,6 +40,7 @@ public class GDriveBackupManager {
     private final GoogleSignInService mSignInService;
     private final String mDataDir;
     private final String mBackupDir;
+    private final String mRootBackupDir;
     private final GeneralData mGeneralData;
     private Disposable mBackupAction;
     private Disposable mRestoreAction;
@@ -46,6 +52,7 @@ public class GDriveBackupManager {
         mGeneralData = GeneralData.instance(context);
         mDataDir = String.format("%s/%s", mContext.getApplicationInfo().dataDir, SHARED_PREFS_SUBDIR);
         mBackupDir = String.format("SmartTubeBackup/%s", context.getPackageName());
+        mRootBackupDir = "SmartTubeBackup";
         mSignInService = GoogleSignInService.instance();
         mBackupNames = new String[] {
                 "yt_service_prefs.xml",
@@ -110,18 +117,18 @@ public class GDriveBackupManager {
 
     private void startBackupConfirm() {
         if (!mIsBlocking) {
-            AppDialogUtil.showConfirmationDialog(mContext, mContext.getString(R.string.app_backup), this::startBackup);
+            AppDialogUtil.showConfirmationDialog(mContext, mContext.getString(R.string.app_backup), this::startBackupWrapper);
         } else {
-            startBackup();
+            startBackupWrapper();
         }
     }
 
-    private void startBackup() {
+    private void startBackupWrapper() {
         String backupDir = getBackupDir();
-        startBackup2(backupDir, mDataDir);
+        startBackup(backupDir, mDataDir);
     }
 
-    private void startBackup(String backupDir, String dataDir) {
+    private void startBackupOld(String backupDir, String dataDir) {
         Collection<File> files = FileHelpers.listFileTree(new File(dataDir));
 
         Consumer<File> backupConsumer = file -> {
@@ -145,7 +152,7 @@ public class GDriveBackupManager {
         }
     }
 
-    private void startBackup2(String backupDir, String dataDir) {
+    private void startBackup(String backupDir, String dataDir) {
         File source = new File(dataDir);
         File zipFile = new File(mContext.getCacheDir(), BACKUP_NAME);
         ZipHelper.zipFolder(source, zipFile, mBackupNames);
@@ -161,25 +168,31 @@ public class GDriveBackupManager {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             unused -> {},
-                            error -> MessageHelpers.showLongMessage(mContext, error.getMessage()),
+                            error -> {
+                                MessageHelpers.showLongMessage(mContext, error.getMessage());
+                                if (Helpers.startsWith(error.getMessage(), "AuthError")) {
+                                    logIn(this::startBackupConfirm); // auth data outdated (AuthError: invalid_grant)
+                                }
+                            },
                             () -> MessageHelpers.showMessage(mContext, R.string.msg_done)
                     );
         }
     }
 
     private void startRestoreConfirm() {
-        AppDialogUtil.showConfirmationDialog(mContext, mContext.getString(R.string.app_restore), this::startRestore);
+        //AppDialogUtil.showConfirmationDialog(mContext, mContext.getString(R.string.app_restore), this::startRestoreWrapper);
+        showRestoreChooserDialog();
     }
 
-    private void startRestore() {
-        startRestore2(getBackupDir(), mDataDir,
-                () -> startRestore2(getAltBackupDir(), mDataDir,
-                        () -> startRestore(getBackupDir(), mDataDir,
-                                () -> startRestore(getAltBackupDir(), mDataDir, null))));
+    private void startRestoreWrapper() {
+        startRestore(getBackupDir(), mDataDir,
+                () -> startRestore(getAltBackupDir(), mDataDir,
+                        () -> startRestoreOld(getBackupDir(), mDataDir,
+                                () -> startRestoreOld(getAltBackupDir(), mDataDir, null))));
     }
 
-    private void startRestore(String backupDir, String dataDir, Runnable onError) {
-        mRestoreAction = DriveService.getList(Uri.parse(backupDir))
+    private void startRestoreOld(String backupDir, String dataDir, Runnable onError) {
+        mRestoreAction = DriveService.getFileList(Uri.parse(backupDir))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io()) // run subscribe on separate thread
                 .subscribe(names -> {
@@ -194,16 +207,18 @@ public class GDriveBackupManager {
                                     .blockingSubscribe(inputStream -> FileHelpers.copy(inputStream, new File(dataDir, fixAltPackageName(name))));
                         }
                     }
-                    
-                    Utils.restartTheApp(mContext);
+
+                    // NOTE: Don't restart the app, just kill. The reboot will broke the files.
+                    // To apply settings we need to kill the app
+                    new Handler(mContext.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 1_000);
                 }, error -> {
                     if (onError != null)
                         onError.run();
-                    else MessageHelpers.showLongMessage(mContext, R.string.nothing_found);
+                    else MessageHelpers.showLongMessage(mContext, error.getMessage());
                 });
     }
 
-    private void startRestore2(String backupDir, String dataDir, Runnable onError) {
+    private void startRestore(String backupDir, String dataDir, Runnable onError) {
         MessageHelpers.showLongMessage(mContext, mContext.getString(R.string.app_restore));
         mRestoreAction = DriveService.getFile(Uri.parse(String.format("%s/%s", backupDir, BACKUP_NAME)))
                 .subscribeOn(Schedulers.io())
@@ -218,11 +233,13 @@ public class GDriveBackupManager {
                     ZipHelper.unzipToFolder(zipFile, out);
                     fixFileNames(out);
 
-                    Utils.restartTheApp(mContext);
+                    // NOTE: Don't restart the app, just kill. The reboot will broke the files.
+                    // To apply settings we need to kill the app
+                    new Handler(mContext.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 1_000);
                 }, error -> {
                     if (onError != null)
                         onError.run();
-                    else MessageHelpers.showLongMessage(mContext, R.string.nothing_found);
+                    else MessageHelpers.showLongMessage(mContext, error.getMessage());
                 }, () -> MessageHelpers.showMessage(mContext, R.string.msg_done));
     }
 
@@ -240,7 +257,14 @@ public class GDriveBackupManager {
     }
 
     private String getAltPackageName() {
-        String[] altPackages = new String[] {"com.liskovsoft.smarttubetv.beta", "com.teamsmart.videomanager.tv"};
+        String[] altPackages = new String[] {
+                "com.liskovsoft.smarttubetv.beta",
+                "com.teamsmart.videomanager.tv",
+                "org.smarttube.beta",
+                "org.smarttube.stable",
+                "org.smarttube.fdroid"
+        };
+        // TODO: don't hard code ids. show all existed.
         return mContext.getPackageName().equals(altPackages[0]) ? altPackages[1] : altPackages[0];
     }
 
@@ -273,5 +297,45 @@ public class GDriveBackupManager {
                 FileHelpers.delete(file);
             }
         }
+    }
+
+    private void showRestoreChooserDialog() {
+        mRestoreAction = DriveService.getFolderList(Uri.parse(mRootBackupDir))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()) // run subscribe on separate thread
+                .subscribe(
+                        this::showLocalRestoreDialog,
+                        error -> {
+                            MessageHelpers.showLongMessage(mContext, error.getMessage());
+                            if (Helpers.startsWith(error.getMessage(), "AuthError")) {
+                                logIn(this::startRestoreConfirm); // auth data outdated (AuthError: invalid_grant)
+                            }
+                        }
+                );
+    }
+
+    private void showLocalRestoreDialog(List<String> backups) {
+        if (backups != null && !backups.isEmpty()) {
+            showLocalRestoreSelectorDialog(backups);
+        } else {
+            MessageHelpers.showLongMessage(mContext, R.string.nothing_found);
+        }
+    }
+
+    private void showLocalRestoreSelectorDialog(List<String> backups) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(mContext);
+        List<OptionItem> options = new ArrayList<>();
+
+        for (String name : backups) {
+            options.add(UiOptionItem.from(name, optionItem -> {
+                AppDialogUtil.showConfirmationDialog(mContext, mContext.getString(R.string.app_restore), () -> {
+                    String backupDir = String.format("%s/%s", mRootBackupDir, name);
+                    startRestore(backupDir, mDataDir, () -> startRestoreOld(backupDir, mDataDir, null));
+                });
+            }));
+        }
+
+        dialog.appendStringsCategory(mContext.getString(R.string.app_restore), options);
+        dialog.showDialog();
     }
 }

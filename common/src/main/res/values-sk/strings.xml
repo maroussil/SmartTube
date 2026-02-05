@@ -36,8 +36,8 @@
     <string name="resolution_switch">Prepnúť rozlíšenie</string>
     <string name="video_buffer">Vyrovnávacia pamäť videa</string>
     <string name="video_buffer_size_none">Žiadna</string>
-    <string name="video_buffer_size_low">Nízka</string>
     <string name="video_buffer_size_lowest">Najnižšia</string>
+    <string name="video_buffer_size_low">Nízka</string>
     <string name="video_buffer_size_med">Stredná</string>
     <string name="video_buffer_size_high">Vysoká</string>
     <string name="video_buffer_size_highest">Najvyššia</string>
@@ -117,9 +117,9 @@
     <string name="cards_style">Štýl kariet</string>
     <string name="repeat_mode_all">Prehrať všetko po jednom</string>
     <string name="repeat_mode_one">Zopakovať aktuálne video</string>
-    <string name="repeat_mode_pause">Pozastaviť prehrávanie po každom videu</string>
+    <string name="repeat_mode_pause">Pozastaviť prehrávanie po každom videu (okrem poradia)</string>
     <string name="repeat_mode_pause_alt">Pozastaviť prehrávanie po každom videu, ktoré nie je v poradí</string>
-    <string name="repeat_mode_none">Vypnúť prehrávanie po jednom videu</string>
+    <string name="repeat_mode_none">Zastaviť prehrávanie po jednom videu (okrem poradia)</string>
     <string name="subscribed_to_channel">Odoberané</string>
     <string name="unsubscribed_from_channel">Odber zrušený</string>
     <string name="subtitle_yellow_transparent">Žlté na priehľadnom pozadí</string>
@@ -238,7 +238,7 @@
     <string name="pin_unpin_channel">Pridať/Odstrániť kanál na postranný panel</string>
     <string name="pin_playlist">Pridať playlist na postranný panel</string>
     <string name="pin_channel">Pridať kanál na postranný panel</string>
-    <string name="pin_to_sidebar">Pridať na postranný panel</string>
+    <string name="pinned_to_sidebar">Pridané na postranný panel</string>
     <string name="unpin_from_sidebar">Odstrániť z postranného panela</string>
     <string name="unpin_group_from_sidebar">Odstrániť skupinu z Odberov</string>
     <string name="unpinned_from_sidebar">Odstránené z postranného panela</string>
@@ -250,7 +250,7 @@
     <string name="hide_shorts">Skryť Shorts z Odberov</string>
     <string name="hide_shorts_channel">Skryť Shorts z kanála</string>
     <string name="key_remapping">Prednastavenie tlačidiel</string>
-    <string name="screen_diming">Stmavenie obrazovky</string>
+    <string name="screen_dimming">Stmavenie obrazovky</string>
     <string name="removed_from_playback_queue">Odstránené zo zoznamu</string>
     <string name="added_to_playback_queue">Pridané do poradia</string>
     <string name="add_remove_from_playback_queue">Pridať/Odstrániť z poradia</string>
@@ -427,9 +427,11 @@
     <string name="save_remove_playlist">Uložiť/Zmazať playlist zo sekcie Playlisty</string>
     <string name="save_playlist">Uložiť playlist do sekcie Playlisty</string>
     <string name="remove_playlist">Zmazať playlist zo sekcie Playlisty natrvalo</string>
+    <string name="remove_playlist_fmt">Natrvalo zmazať %s?</string>
     <string name="removed_from_playlists">Zmazané zo sekcie Playlisty</string>
     <string name="saved_to_playlists">Pridané do sekcie Playlisty</string>
     <string name="create_playlist">Vytvoriť playlist</string>
+    <string name="create_playlist_note">nebude viditeľný v aplikácii YouTube</string>
     <string name="add_video_to_new_playlist">Pridať do nového playlistu</string>
     <string name="cant_delete_empty_playlist">Nemožno zmazať prázdny playlist</string>
     <string name="playlist">Playlist</string>
@@ -488,8 +490,8 @@
     <string name="sources">Zdroje</string>
     <string name="releases">Vydané verzie</string>
     <string name="prefer_avc_over_vp9">Výber kodeku: preferovať AVC pred VP9</string>
+    <string name="open_chat">Chat/Komentáre</string>
     <string name="open_comments">Otvoriť komentáre</string>
-    <string name="open_chat">Chat</string>
     <string name="place_chat_left">Zobraziť chat na ľavej strane</string>
     <string name="place_comments_left">Umiestniť komentáre vľavo</string>
     <string name="use_alt_speech_recognizer">Alternatívne rozpoznávanie jazyka</string>
@@ -587,6 +589,7 @@
     <string name="update_found">Aktualizácia</string>
     <string name="volume_boost_warning">Akékoľvek nastavenie nad limit môže poškodiť reproduktory</string>
     <string name="play_video_incognito">Prehrať anonymne</string>
+    <string name="play_from_start">Prehrať od začiatku</string>
     <string name="header_kids_home">Deti</string>
     <string name="player_section_playlist">Použiť aktuálny obsah sekcie ako playlist</string>
     <string name="header_trending">Trendy</string>
@@ -602,6 +605,7 @@
     <string name="content_block_exclude_channel">Neaplikovať SponsorBlock na tento kanál</string>
     <string name="content_block_stop_excluding_channel">Znovu aplikovať SponsorBlock na tento kanál</string>
     <string name="player_chapter_notification">Rýchlejšie presúvanie cez kapitoly pomocou notifikácií</string>
+    <string name="player_chapter_notification2">Prepnúť na ďalšiu kapitolu kliknutím na notifikáciu</string>
     <string name="subtitle_remember">Povoliť titulky iba na aktuálnom kanáli</string>
     <string name="amazon_frame_drop_fix">Oprava výpadkov prehrávania #2</string>
     <string name="amazon_frame_drop_fix_desc">Určené pre zariadenia Amazon Stick. Môže fungovať aj na iných zariadeniach.</string>
@@ -705,4 +709,12 @@
     <string name="card_preview_full">Video so zvukom</string>
     <string name="card_preview">Náhľad karty</string>
     <string name="card_unlocalized_titles">Nelokalizované názvy videí</string>
+    <string name="dont_resize_video_to_fit_dialog">Nemeniť veľkosť videa na veľkosť dialógu</string>
+    <string name="typing_corrections">Vypnúť automatické opravy pri písaní textu</string>
+    <string name="suggestions_horizontally_scrolled">Horizontálne posúvané návrhy</string>
+    <string name="stable_restore">Obnoviť stabilnú verziu (všetky dáta budú stratené)</string>
+    <string name="auto_backup_category">Automatická záloha</string>
+    <string name="once_a_day">Raz denne</string>
+    <string name="once_a_week">Raz týždenne</string>
+    <string name="once_a_month">Raz mesačne</string>
 </resources>

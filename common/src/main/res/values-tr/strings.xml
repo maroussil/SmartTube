@@ -81,6 +81,7 @@
     <string name="player_only_ui">Sadece arayüz</string>
     <string name="player_ui_and_pause">Arayüz ve duraklat</string>
     <string name="player_only_pause">Sadece duraklat</string>
+    <string name="player_toggle_speed">Hızı açma/kapama</string>
     <string name="check_for_updates">Güncellemeyi kontrol et</string>
     <string name="update_not_found">En son sürümü kullanıyorsunuz</string>
     <string name="update_in_progress">Bekleyin…</string>
@@ -117,9 +118,9 @@
     <string name="cards_style">Kart stili</string>
     <string name="repeat_mode_all">Videoları sürekli oynat</string>
     <string name="repeat_mode_one">Videoyu tekrarla</string>
-    <string name="repeat_mode_pause">Her videodan sonra oynatmayı duraklat</string>
+    <string name="repeat_mode_pause">Her videodan sonra oynatmayı duraklat (kuyruk hariç)</string>
     <string name="repeat_mode_pause_alt">Sadece oynatma listesi videolarını sürekli oynat</string>
-    <string name="repeat_mode_none">Videodan sonra oynatmayı durdur</string>
+    <string name="repeat_mode_none">Videodan sonra oynatmayı durdur (kuyruk hariç)</string>
     <string name="subscribed_to_channel">Abone olundu</string>
     <string name="unsubscribed_from_channel">Abonelikten çıkıldı</string>
     <string name="subtitle_yellow_transparent">Sarı (Saydam arka plan)</string>
@@ -236,7 +237,7 @@
     <string name="pin_unpin_from_sidebar">Kenar çubuğuna Ekle/Kaldır</string>
     <string name="pin_unpin_playlist">Oynatma listesini kenar çubuğuna Ekle/Kaldır</string>
     <string name="pin_unpin_channel">Kanalı kenar çubuğuna Ekle/Kaldır</string>
-    <string name="pin_playlist">Onatma listesini kenar çubuğuna ekle</string>>
+    <string name="pin_playlist">Onatma listesini kenar çubuğuna ekle</string>
     <string name="pin_channel">Kanalı kenar çubuğuna ekle</string>
     <string name="pinned_to_sidebar">Kenar çubuğuna eklendi</string>
     <string name="unpin_from_sidebar">Kenar çubuğundan kaldır</string>
@@ -431,6 +432,7 @@
     <string name="removed_from_playlists">Oynatma Listeleri bölümünden kaldırıldı</string>
     <string name="saved_to_playlists">Oynatma Listeleri bölümüne eklendi</string>
     <string name="create_playlist">Oynatma listesi oluştur</string>
+    <string name="create_playlist_note">YouTube uygulamasında görünmeyecek</string>
     <string name="add_video_to_new_playlist">Videoyu yeni oynatma listesine ekle</string>
     <string name="cant_delete_empty_playlist">Boş oynatma listesi silinemiyor</string>
     <string name="playlist">Oynatma listesi</string>
@@ -467,7 +469,6 @@
     <string name="playback_starts_shortly">Canlı yayın başladığında otomatik olarak oynatılacaktır.</string>
     <string name="starting_stream">Canlı yayın başlatılıyor…</string>
     <string name="action_playlist_remove">Oynatma listesinden kaldır</string>
-    <!-- BEGIN Moved strings -->
     <string name="signin_view_title">Kullanıcı Kodu yükleniyor…</string>
     <string name="signin_view_description">Oturum açmak için bu kodu sayfaya girin %s\nNOT: Yalnızca Firefox ya da Chrome tarayıcılarla çalışır.</string>
     <string name="signin_view_action_text">Tamam</string>
@@ -482,7 +483,6 @@
     <string name="playback_controls_repeat_list">Tekrarla Liste</string>
     <string name="action_subscribe_off">Abone ol Kapalı</string>
     <string name="action_subscribe_on">Abone ol Açık</string>
-    <!-- END Moved strings -->
     <string name="skip_24_rate">24 fps biçimlerini atla (gerçek sinema modu düzeltmesi\?)</string>
     <string name="skip_shorts">Shortsları atla</string>
     <string name="player_disable_suggestions">Önerileri devre dışı bırak</string>
@@ -590,6 +590,7 @@
     <string name="update_found">Güncelleme</string>
     <string name="volume_boost_warning">Sınırın üzerindeki herhangi bir ayar hoparlörlere zarar verebilir</string>
     <string name="play_video_incognito">Gizli oynat</string>
+    <string name="play_from_start">Baştan oyna</string>
     <string name="header_kids_home">Kids</string>
     <string name="player_section_playlist">Geçerli bölüm içeriklerini oynatma listesi olarak kullan</string>
     <string name="header_trending">Trendler</string>
@@ -605,6 +606,7 @@
     <string name="content_block_exclude_channel">Bu kanalı SponsorBlock\'tan hariç tut</string>
     <string name="content_block_stop_excluding_channel">Bu kanalı SponsorBlock\'tan hariç tutmayı durdur</string>
     <string name="player_chapter_notification">Açılır bildirimi kullanarak bölümler arasında hızlı ilerle</string>
+    <string name="player_chapter_notification2">Bildirime tıklayarak bir sonraki bölüme geç</string>
     <string name="subtitle_remember">Her kanal için etkinleştirilmiş altyazıları hatırla</string>
     <string name="amazon_frame_drop_fix">Kare bırakma düzeltmesi #2</string>
     <string name="amazon_frame_drop_fix_desc">Amazon Stick cihazları için tasarlanmıştır. Diğer cihazlarda da çalışabilir.</string>
@@ -617,7 +619,7 @@
     <string name="autogenerated">otomatik oluşturuldu</string>
     <string name="player_auto_volume">Otomatik ses ayarı</string>
     <string name="header_shorts">Shorts</string>
-    <string name="player_global_focus">Oynatıcı düğmesi satırları arasında kusursuz gezinme</string>
+    <string name="player_global_focus">Oynatıcı düğme satırları arasında odağı senkronize et</string>
     <string name="auto_history">Otomatik (hesap ayarlarını kullan)</string>
     <string name="remember_position_subscriptions">Abonelikler\'de son görüntülenen konumu hatırla</string>
     <string name="remember_position_pinned">Sabitlenmiş oynatma listelerinde son görüntülenen konumu hatırla</string>
@@ -652,7 +654,9 @@
     <string name="channel_filter_hint">Kanalları filtrele</string>
     <string name="player_loop_shorts">Shortsları tekrarla</string>
     <string name="player_quick_shorts_skip">Shortsları sol/sağ düğmeyle atla</string>
+    <string name="player_quick_shorts_skip_alt">Shortsları yukarı/aşağı düğmeyle atla</string>
     <string name="player_quick_skip_videos">Atla Normal videolar sol/sağ düğmeyle</string>
+    <string name="player_quick_skip_videos_alt">Atla Normal videolar yukarı/aşağı düğmeyle</string>
     <string name="channels_filter">Kanallar bölümü içindeki Kanalları filtrele alanını göster</string>
     <string name="channel_search_bar">Kanal sayfasında arama çubuğu</string>
     <string name="header_sports">Spor</string>
@@ -671,6 +675,7 @@
     <string name="fullscreen_mode">Tam ekran modu (sistem çubukları olmadan)</string>
     <string name="player_only_mode">Video uygulama dışında açılırsa yalnızca oynatıcıyı göster</string>
     <string name="pinned_channel_rows">Sabitlenmiş kanalı satır olarak göster</string>
+    <string name="prefer_google_dns">Google DNS tercih et</string>
     <string name="prefer_ipv4">IPv4 DNS tercih et</string>
     <string name="prefer_ipv4_desc">Uygulamanın hiç çalışmadığı durumları düzeltebilir.\nNot: Takılmalara ve çökmelere neden olabilir (özellikle Android 8 cihazlarda ya da Dune HD\'de)</string>
     <string name="long_press_for_settings">AYARLAR İÇİN UZUN BASIN</string>
@@ -701,10 +706,20 @@
     <string name="player_audio_focus">Ses odaklama (diğer video oynatıcılar algılanırsa duraklatma)</string>
     <string name="paid_content_notification">Ücretli içerik bildirimleri</string>
     <string name="you_liked">sen beğendin</string>
+    <string name="premium_users_only">Premium users only. Fix for incomplete video format list</string>
+    <string name="playback_buffering_fix">Playback buffering fix</string>
+    <string name="oculus_quest_fix">Oculus Quest fix</string>
     <string name="card_preview_muted">Sessiz video</string>
     <string name="card_preview_full">Sesli video</string>
     <string name="card_preview">Kart önizlemesi</string>
     <string name="card_unlocalized_titles">Yerelleştirilmemiş video başlıkları</string>
     <string name="dont_resize_video_to_fit_dialog">Videoyu diyaloğa uyacak şekilde yeniden boyutlandırmayın</string>
     <string name="typing_corrections">Metin yazarken otomatik düzeltmeyi devre dışı bırak</string>
+    <string name="suggestions_horizontally_scrolled">Yatay Kaydırılan Öneriler</string>
+    <string name="stable_restore">Kararlı sürümü geri yükle (tüm veriler silinecek)</string>
+    <string name="auto_backup_category">Otomatik yedekleme</string>
+    <string name="once_a_day">Günde bir kez</string>
+    <string name="once_a_week">Haftada bir kez</string>
+    <string name="once_a_month">Ayda bir kez</string>
+    <string name="action_debug_info">Hata ayıklama bilgileri</string>
 </resources>

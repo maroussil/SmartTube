@@ -87,18 +87,18 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
 
         options.add(UiOptionItem.from(
                 getContext().getString(R.string.player_only_ui),
-                option -> mPlayerData.setOKButtonBehavior(PlayerData.ONLY_UI),
-                mPlayerData.getOKButtonBehavior() == PlayerData.ONLY_UI));
+                option -> mPlayerData.setOKButtonBehavior(PlayerData.OK_ONLY_UI),
+                mPlayerData.getOKButtonBehavior() == PlayerData.OK_ONLY_UI));
 
         options.add(UiOptionItem.from(
                 getContext().getString(R.string.player_ui_and_pause),
-                option -> mPlayerData.setOKButtonBehavior(PlayerData.UI_AND_PAUSE),
-                mPlayerData.getOKButtonBehavior() == PlayerData.UI_AND_PAUSE));
+                option -> mPlayerData.setOKButtonBehavior(PlayerData.OK_UI_AND_PAUSE),
+                mPlayerData.getOKButtonBehavior() == PlayerData.OK_UI_AND_PAUSE));
 
         options.add(UiOptionItem.from(
                 getContext().getString(R.string.player_only_pause),
-                option -> mPlayerData.setOKButtonBehavior(PlayerData.ONLY_PAUSE),
-                mPlayerData.getOKButtonBehavior() == PlayerData.ONLY_PAUSE));
+                option -> mPlayerData.setOKButtonBehavior(PlayerData.OK_ONLY_PAUSE),
+                mPlayerData.getOKButtonBehavior() == PlayerData.OK_ONLY_PAUSE));
 
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.player_ok_button_behavior), options);
     }
@@ -204,7 +204,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 {R.string.seek_interval, PlayerTweaksData.PLAYER_BUTTON_SEEK_INTERVAL},
                 {R.string.share_link, PlayerTweaksData.PLAYER_BUTTON_SHARE},
                 {R.string.action_video_info, PlayerTweaksData.PLAYER_BUTTON_VIDEO_INFO},
-                {R.string.action_video_stats, PlayerTweaksData.PLAYER_BUTTON_VIDEO_STATS},
+                {R.string.action_debug_info, PlayerTweaksData.PLAYER_BUTTON_VIDEO_STATS},
                 {R.string.action_playback_queue, PlayerTweaksData.PLAYER_BUTTON_PLAYBACK_QUEUE},
                 {R.string.screen_dimming, PlayerTweaksData.PLAYER_BUTTON_SCREEN_DIMMING},
                 {R.string.action_video_zoom, PlayerTweaksData.PLAYER_BUTTON_VIDEO_ZOOM},
@@ -237,6 +237,11 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
 
     private void appendDeveloperCategory(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.playback_notifications_fix),
+                getContext().getString(R.string.playback_notifications_fix_desc),
+                option -> mPlayerTweaksData.setPlaybackNotificationsDisabled(option.isSelected()),
+                mPlayerTweaksData.isPlaybackNotificationsDisabled()));
         
         options.add(UiOptionItem.from(getContext().getString(R.string.disable_network_error_fixing),
                 getContext().getString(R.string.disable_network_error_fixing_desc),
@@ -251,13 +256,21 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 },
                 mPlayerTweaksData.isOculusQuestFixEnabled()));
 
+        options.add(UiOptionItem.from(getContext().getString(R.string.prefer_google_dns),
+                getContext().getString(R.string.prefer_ipv4_desc),
+                option -> {
+                    mPlayerTweaksData.setPreferredDnsType(option.isSelected() ? PlayerTweaksData.DNS_TYPE_GOOGLE : PlayerTweaksData.DNS_TYPE_SYSTEM);
+                    mRestartApp = true;
+                },
+                mPlayerTweaksData.getPreferredDnsType() == PlayerTweaksData.DNS_TYPE_GOOGLE));
+
         options.add(UiOptionItem.from(getContext().getString(R.string.prefer_ipv4),
                 getContext().getString(R.string.prefer_ipv4_desc),
                 option -> {
-                    mPlayerTweaksData.setIPv4DnsPreferred(option.isSelected());
+                    mPlayerTweaksData.setPreferredDnsType(option.isSelected() ? PlayerTweaksData.DNS_TYPE_IPV4 : PlayerTweaksData.DNS_TYPE_SYSTEM);
                     mRestartApp = true;
                 },
-                mPlayerTweaksData.isIPv4DnsPreferred()));
+                mPlayerTweaksData.getPreferredDnsType() == PlayerTweaksData.DNS_TYPE_IPV4));
 
         // Disable long press on buggy controllers.
         options.add(UiOptionItem.from(getContext().getString(R.string.disable_ok_long_press),
@@ -312,11 +325,6 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 getContext().getString(R.string.disable_stream_buffer_desc),
                 option -> mPlayerTweaksData.setBufferOnStreamsDisabled(option.isSelected()),
                 mPlayerTweaksData.isBufferOnStreamsDisabled()));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.playback_notifications_fix),
-                getContext().getString(R.string.playback_notifications_fix_desc),
-                option -> mPlayerTweaksData.setPlaybackNotificationsDisabled(option.isSelected()),
-                mPlayerTweaksData.isPlaybackNotificationsDisabled()));
 
         options.add(UiOptionItem.from(getContext().getString(R.string.unlock_all_formats),
                 getContext().getString(R.string.unlock_all_formats_desc),
@@ -500,6 +508,10 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
+        options.add(UiOptionItem.from(getContext().getString(R.string.suggestions_horizontally_scrolled),
+                option -> mPlayerTweaksData.setSuggestionsHorizontallyScrolled(option.isSelected()),
+                mPlayerTweaksData.isSuggestionsHorizontallyScrolled()));
+
         options.add(UiOptionItem.from(getContext().getString(R.string.dont_resize_video_to_fit_dialog),
                 option -> mPlayerTweaksData.setDontResizeVideoToFitDialogEnabled(option.isSelected()),
                 mPlayerTweaksData.isDontResizeVideoToFitDialogEnabled()));
@@ -516,7 +528,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 option -> mPlayerTweaksData.setSectionPlaylistEnabled(option.isSelected()),
                 mPlayerTweaksData.isSectionPlaylistEnabled()));
 
-        options.add(UiOptionItem.from(getContext().getString(R.string.player_chapter_notification),
+        options.add(UiOptionItem.from(getContext().getString(R.string.player_chapter_notification2),
                 option -> mPlayerTweaksData.setChapterNotificationEnabled(option.isSelected()),
                 mPlayerTweaksData.isChapterNotificationEnabled()));
 
@@ -594,8 +606,8 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
 
         options.add(UiOptionItem.from(getContext().getString(R.string.player_global_focus),
                 getContext().getString(R.string.player_global_focus_desc),
-                option -> mPlayerTweaksData.setSimplePlayerNavigationEnabled(option.isSelected()),
-                mPlayerTweaksData.isSimplePlayerNavigationEnabled()));
+                option -> mPlayerTweaksData.setSyncRowButtonIndexEnabled(option.isSelected()),
+                mPlayerTweaksData.isSyncRowButtonIndexEnabled()));
 
         options.add(UiOptionItem.from(getContext().getString(R.string.player_ui_on_next),
                 option -> mPlayerTweaksData.setPlayerUiOnNextEnabled(option.isSelected()),

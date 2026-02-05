@@ -28,7 +28,7 @@ public class VideoStateController extends BasePlayerController {
     private static final long SHORT_LIVE_BUFFER_MS = 0; // Note, on buffer lower than the 60sec you'll notice segment skip
     private static final long BEGIN_THRESHOLD_MS = 10_000;
     private static final long EMBED_THRESHOLD_MS = 30_000;
-    private static final int HISTORY_UPDATE_INTERVAL_MINUTES = 5; // Sync history every five minutes
+    private static final int HISTORY_UPDATE_INTERVAL_MINUTES = 3; // Sync history every x minutes
     private boolean mIsPlayEnabled;
     private boolean mIsPlayBlocked;
     private int mTickleLeft;
@@ -72,7 +72,7 @@ public class VideoStateController extends BasePlayerController {
     @Override
     public boolean onPreviousClicked() {
         // Seek to the start on prev
-        if (getPlayer().getPositionMs() > BEGIN_THRESHOLD_MS && !getVideo().isShorts) {
+        if (getPlayer() != null && getPlayer().getPositionMs() > BEGIN_THRESHOLD_MS) {
             saveState(); // in case the user wants to go to previous video
             getPlayer().setPositionMs(100);
             return true;
@@ -85,7 +85,8 @@ public class VideoStateController extends BasePlayerController {
     @Override
     public boolean onNextClicked() {
         // Seek to the actual live position on next
-        if (getVideo() != null && getVideo().isLive && (getPlayer().getDurationMs() - getPlayer().getPositionMs() > getLiveThreshold())) {
+        if (getVideo() != null && getPlayer() != null
+                && getVideo().isLive && (getPlayer().getDurationMs() - getPlayer().getPositionMs() > getLiveThreshold())) {
             getPlayer().setPositionMs(getPlayer().getDurationMs() - getLiveBuffer());
             return true;
         }
@@ -389,6 +390,10 @@ public class VideoStateController extends BasePlayerController {
     }
 
     private void restoreVideoFormat() {
+        if (getPlayer() == null) {
+            return;
+        }
+
         if (getPlayerData().getTempVideoFormat() != null) {
             getPlayer().setFormat(getPlayerData().getTempVideoFormat());
         } else {
@@ -479,6 +484,10 @@ public class VideoStateController extends BasePlayerController {
 
     private void restorePosition() {
         Video item = getVideo();
+
+        if (getPlayer() == null || item == null) {
+            return;
+        }
 
         State state = getStateService().getByVideoId(item.videoId);
 

@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.util.Pair;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
 import com.google.android.exoplayer2.Format;
@@ -27,6 +28,7 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecInfo;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.liskovsoft.sharedutils.helpers.AppInfoHelpers;
+import com.liskovsoft.sharedutils.helpers.DeviceHelpers;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.querystringparser.UrlQueryStringFactory;
@@ -34,10 +36,12 @@ import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.autoframerate.internal.DisplayHolder.Mode;
 import com.liskovsoft.smartyoutubetv2.common.autoframerate.internal.UhdHelper;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.ExoUtils;
+import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.app.models.AppInfo;
+import com.liskovsoft.youtubeapi.common.helpers.AppClient;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import org.chromium.net.ApiVersion;
@@ -208,6 +212,7 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
         appendWebViewInfo();
         appendVideoInfoType();
         appendVideoInfoVersion();
+        appendAccountInfo();
 
         // Schedule next update
         mDebugViewGroup.removeCallbacks(this);
@@ -257,7 +262,18 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
         //mVideoInfo.add(new Pair<>("Aspect Ratio", par));
         String videoCodecName = getVideoDecoderNameV2();
         mVideoInfo.add(new Pair<>("Video decoder name", videoCodecName));
-        mVideoInfo.add(new Pair<>("Hardware accelerated", String.valueOf(Helpers.isHardwareAccelerated(videoCodecName))));
+        mVideoInfo.add(new Pair<>("Hardware accelerated", String.valueOf(DeviceHelpers.isHardwareAccelerated(videoCodecName))));
+        
+        if (video.colorInfo != null) {
+            String transferFunction = getColorTransferString(video.colorInfo.colorTransfer);
+            if (!transferFunction.equals(NOT_AVAILABLE)) {
+                mVideoInfo.add(new Pair<>("Transfer function", transferFunction));
+            }
+            String colorSpace = getColorSpaceString(video.colorInfo.colorSpace);
+            if (!colorSpace.equals(NOT_AVAILABLE)) {
+                mVideoInfo.add(new Pair<>("Color space", colorSpace));
+            }
+        }
     }
 
     private void appendRuntimeInfo() {
@@ -357,10 +373,8 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
     }
 
     private void appendMemoryInfo() {
-        long maxMemory = Runtime.getRuntime().maxMemory();
-        long allocatedMemory = Runtime.getRuntime().totalMemory();
-        appendRow("Memory limit (MB)", (int)(maxMemory / (1024 * 1024))); // Growth Limit
-        appendRow("Allocated memory (MB)", (int)(allocatedMemory / (1024 * 1024)));
+        appendRow("Max heap memory (MB)", DeviceHelpers.getMaxHeapMemoryMB()); // Growth Limit
+        appendRow("Allocated heap memory (MB)", DeviceHelpers.getAllocatedHeapMemoryMB());
     }
 
     private void appendWebViewInfo() {
@@ -368,8 +382,10 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
     }
 
     private void appendVideoInfoType() {
-        Pair<Integer, Boolean> videoInfoType = MediaServiceData.instance().getVideoInfoType();
-        appendRow("Video info type", videoInfoType.first);
+        int videoInfoType = MediaServiceData.instance().getVideoInfoType();
+        String infoName = videoInfoType != -1 && videoInfoType < AppClient.values().length ? AppClient.values()[videoInfoType].name() : "default";
+
+        appendRow("Video info type", infoName);
     }
 
     private void appendVideoInfoVersion() {
@@ -382,6 +398,10 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
             appendRow("Video info version", isFailed ? Utils.color(playerVersion, Color.RED) : playerVersion);
             appendRow("Video info url", isFailed ? Utils.color(shortPlayerUrl, Color.RED) : shortPlayerUrl);
         }
+    }
+
+    private void appendAccountInfo() {
+        appendRow("Account info", MediaServiceManager.instance().printAccountDebugInfo());
     }
 
     private void appendRow(String name, boolean val) {
@@ -471,6 +491,40 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
 
     private String getVideoDecoderNameV2() {
         return ExoUtils.getVideoDecoderName();
+    }
+
+    private String getColorTransferString(int colorTransfer) {
+        if (colorTransfer == Format.NO_VALUE) {
+            return NOT_AVAILABLE;
+        }
+
+        switch (colorTransfer) {
+            case C.COLOR_TRANSFER_SDR:
+                return "Gamma";
+            case C.COLOR_TRANSFER_ST2084:
+                return "PQ (ST.2084)";
+            case C.COLOR_TRANSFER_HLG:
+                return "HLG";
+            default:
+                return NOT_AVAILABLE;
+        }
+    }
+
+    private String getColorSpaceString(int colorSpace) {
+        if (colorSpace == Format.NO_VALUE) {
+            return NOT_AVAILABLE;
+        }
+
+        switch (colorSpace) {
+            case C.COLOR_SPACE_BT601:
+                return "BT.601";
+            case C.COLOR_SPACE_BT709:
+                return "BT.709";
+            case C.COLOR_SPACE_BT2020:
+                return "BT.2020";
+            default:
+                return NOT_AVAILABLE;
+        }
     }
 
     private String getRawDisplayResolution() {

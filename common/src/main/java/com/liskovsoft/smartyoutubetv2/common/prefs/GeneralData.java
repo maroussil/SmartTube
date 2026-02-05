@@ -85,7 +85,8 @@ public class GeneralData implements ProfileChangeListener {
     private Map<Integer, Video> mSelectedItems;
     private boolean mIsFirstUseTooltipEnabled;
     private boolean mIsDeviceSpecificBackupEnabled;
-    private boolean mIsAutoBackupEnabled;
+    private int mGDriveBackupFreqDays;
+    private int mLocalDriveBackupFreqDays;
     private List<Video> mOldPinnedItems;
     private final Runnable mPersistStateInt = this::persistStateInt;
 
@@ -253,7 +254,7 @@ public class GeneralData implements ProfileChangeListener {
     }
 
     public void setRemapDpadUpDownToSpeedEnabled(boolean enable) {
-        resetDpadUpSettings();
+        resetDpadUpDownSettings();
         mIsRemapDpadUpToSpeedEnabled = enable;
         persistState();
     }
@@ -263,14 +264,15 @@ public class GeneralData implements ProfileChangeListener {
     }
 
     public void setRemapDpadUpToVolumeEnabled(boolean enable) {
-        resetDpadUpSettings();
+        resetDpadUpDownSettings();
         mIsRemapDpadUpToVolumeEnabled = enable;
         persistState();
     }
 
-    private void resetDpadUpSettings() {
+    public void resetDpadUpDownSettings() {
         mIsRemapDpadUpToSpeedEnabled = false;
         mIsRemapDpadUpToVolumeEnabled = false;
+        persistState();
     }
 
     public boolean isRemapDpadLeftToVolumeEnabled() {
@@ -278,7 +280,13 @@ public class GeneralData implements ProfileChangeListener {
     }
 
     public void setRemapDpadLeftToVolumeEnabled(boolean enable) {
+        resetDpadLeftRightSettings();
         mIsRemapDpadLeftToVolumeEnabled = enable;
+        persistState();
+    }
+
+    public void resetDpadLeftRightSettings() {
+        mIsRemapDpadLeftToVolumeEnabled = false;
         persistState();
     }
 
@@ -670,12 +678,21 @@ public class GeneralData implements ProfileChangeListener {
         persistState();
     }
 
-    public boolean isAutoBackupEnabled() {
-        return mIsAutoBackupEnabled;
+    public int getGDriveBackupFreqDays() {
+        return mGDriveBackupFreqDays;
     }
 
-    public void setAutoBackupEnabled(boolean enable) {
-        mIsAutoBackupEnabled = enable;
+    public void setGDriveBackupFreqDays(int freqDays) {
+        mGDriveBackupFreqDays = freqDays;
+        persistState();
+    }
+
+    public int getLocalDriveBackupFreqDays() {
+        return mLocalDriveBackupFreqDays;
+    }
+
+    public void setLocalDriveBackupFreqDays(int freqDays) {
+        mLocalDriveBackupFreqDays = freqDays;
         persistState();
     }
 
@@ -757,9 +774,15 @@ public class GeneralData implements ProfileChangeListener {
         mSelectedItems = Helpers.parseMap(split, 63, Helpers::parseInt, Video::fromString);
         mIsFirstUseTooltipEnabled = Helpers.parseBoolean(split, 64, true);
         mIsDeviceSpecificBackupEnabled = Helpers.parseBoolean(split, 65, false);
-        mIsAutoBackupEnabled = Helpers.parseBoolean(split, 66, false);
+        //mIsAutoBackupEnabled = Helpers.parseBoolean(split, 66, false);
         mIsRemapPageDownToSpeedEnabled = Helpers.parseBoolean(split, 67, false);
         mSearchExitShortcut = Helpers.parseInt(split, 68, EXIT_SINGLE_BACK);
+        mGDriveBackupFreqDays = Helpers.parseInt(split, 69, -1);
+        mLocalDriveBackupFreqDays = Helpers.parseInt(split, 70, -1);
+    }
+
+    public void persistNow() {
+        Utils.post(mPersistStateInt);
     }
 
     private void persistState() {
@@ -778,10 +801,11 @@ public class GeneralData implements ProfileChangeListener {
                 mPlaylistOrder, mPendingStreams, mIsGlobalClockEnabled, null, mSettingsPassword, mIsChildModeEnabled, mIsHistoryEnabled,
                 mScreensaverTimeoutMs, null, mIsAltAppIconEnabled, mVersionCode, mIsSelectChannelSectionEnabled, mMasterPassword,
                 null, mIsOldUpdateNotificationsEnabled, mScreensaverDimmingPercents, mIsRemapNextToSpeedEnabled, mIsRemapPlayToOKEnabled,
-                mHistoryState, mIsRememberSubscriptionsPositionEnabled, null, mIsRemapNumbersToSpeedEnabled, mIsRemapDpadUpToSpeedEnabled, mIsRemapChannelUpToVolumeEnabled,
-                mIsRemapDpadUpToVolumeEnabled, mIsRemapDpadLeftToVolumeEnabled, mIsRemapNextToFastForwardEnabled, mIsHideWatchedFromNotificationsEnabled,
-                mChangelog, mPlayerExitShortcut, null, mIsFullscreenModeEnabled, null, mIsRememberPinnedPositionEnabled, mSelectedItems, mIsFirstUseTooltipEnabled, mIsDeviceSpecificBackupEnabled, mIsAutoBackupEnabled,
-                mIsRemapPageDownToSpeedEnabled, mSearchExitShortcut));
+                mHistoryState, mIsRememberSubscriptionsPositionEnabled, null, mIsRemapNumbersToSpeedEnabled, mIsRemapDpadUpToSpeedEnabled,
+                mIsRemapChannelUpToVolumeEnabled, mIsRemapDpadUpToVolumeEnabled, mIsRemapDpadLeftToVolumeEnabled, mIsRemapNextToFastForwardEnabled,
+                mIsHideWatchedFromNotificationsEnabled, mChangelog, mPlayerExitShortcut, null, mIsFullscreenModeEnabled, null,
+                mIsRememberPinnedPositionEnabled, mSelectedItems, mIsFirstUseTooltipEnabled, mIsDeviceSpecificBackupEnabled, null,
+                mIsRemapPageDownToSpeedEnabled, mSearchExitShortcut, mGDriveBackupFreqDays, mLocalDriveBackupFreqDays));
     }
 
     @Override

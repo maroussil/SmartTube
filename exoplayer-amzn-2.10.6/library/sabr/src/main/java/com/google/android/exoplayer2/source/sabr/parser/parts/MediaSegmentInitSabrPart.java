@@ -1,7 +1,7 @@
 package com.google.android.exoplayer2.source.sabr.parser.parts;
 
 import com.google.android.exoplayer2.source.sabr.parser.models.FormatSelector;
-import com.google.android.exoplayer2.source.sabr.protos.videostreaming.FormatId;
+import com.google.android.exoplayer2.source.sabr.protos.misc.FormatId;
 
 public class MediaSegmentInitSabrPart implements SabrPart {
     public final FormatSelector formatSelector;
@@ -9,10 +9,10 @@ public class MediaSegmentInitSabrPart implements SabrPart {
     public final long playerTimeMs;
     public final long sequenceNumber;
     public final long totalSegments;
-    public final int durationMs;
+    public final long durationMs;
     public final boolean durationEstimated;
-    public final int startBytes;
-    public final int startTimeMs;
+    public final long startBytes;
+    public final long startTimeMs;
     public final boolean isInitSegment;
     public final long contentLength;
     public final boolean contentLengthEstimate;
@@ -23,10 +23,10 @@ public class MediaSegmentInitSabrPart implements SabrPart {
             long playerTimeMs,
             long sequenceNumber,
             long totalSegments,
-            int durationMs,
+            long durationMs,
             boolean durationEstimated,
-            int startBytes,
-            int startTimeMs,
+            long startBytes,
+            long startTimeMs,
             boolean isInitSegment,
             long contentLength,
             boolean contentLengthEstimate) {

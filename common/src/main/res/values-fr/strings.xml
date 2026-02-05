@@ -707,4 +707,18 @@
   <string name="original_lang">Original</string>
   <string name="remove_playlist_fmt">Supprimer %s définitivement\?</string>
   <string name="dont_resize_video_to_fit_dialog">Ne pas ajuster la vidéo à la fenêtre</string>
+  <string name="typing_corrections">Désactiver la correction automatique lors de la saisie de texte</string>
+  <string name="play_from_start">Lire depuis le début</string>
+  <string name="player_chapter_notification2">Passez au chapitre suivant en cliquant sur la notification</string>
+  <string name="suggestions_horizontally_scrolled">Suggestions défilant horizontalement</string>
+  <string name="stable_restore">Restaurer la version stable (toutes les données seront perdues)</string>
+  <string name="auto_backup_category">Sauvegarde automatique</string>
+  <string name="once_a_day">Une fois par jour</string>
+  <string name="once_a_week">Une fois par semaine</string>
+  <string name="once_a_month">Une fois par mois</string>
+  <string name="player_toggle_speed">Basculer la vitesse marche/arrêt</string>
+  <string name="create_playlist_note">cela ne sera pas visible dans l’application YouTube</string>
+  <string name="player_quick_shorts_skip_alt">Naviguer entre les Shorts avec les boutons haut/bas</string>
+  <string name="player_quick_skip_videos_alt">Naviguer entre les vidéos standards avec les boutons haut/bas</string>
+  <string name="prefer_google_dns">Privilégier les DNS Google</string>
 </resources>

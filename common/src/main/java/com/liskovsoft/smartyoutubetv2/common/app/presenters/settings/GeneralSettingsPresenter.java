@@ -74,18 +74,11 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         appendBootToSection(settingsPresenter);
         appendEnabledSections(settingsPresenter);
         appendContextMenuItemsCategory(settingsPresenter);
-        //appendContextMenuSortingCategory(settingsPresenter);
-        //appendTopButtonsCategory(settingsPresenter);
         appendHideVideos(settingsPresenter);
         appendAppExitCategory(settingsPresenter);
         appendBackgroundPlaybackCategory(settingsPresenter);
-        //appendBackgroundPlaybackActivationCategory(settingsPresenter);
         appendScreenDimmingCategory(settingsPresenter);
-        //appendScreenDimmingAmountCategory(settingsPresenter);
-        //appendScreenDimmingTimeoutCategory(settingsPresenter);
-        //appendTimeFormatCategory(settingsPresenter);
         appendKeyRemappingCategory(settingsPresenter);
-        //appendAppBackupCategory(settingsPresenter);
         appendInternetCensorship(settingsPresenter);
         appendHistoryCategory(settingsPresenter);
         appendMiscCategory(settingsPresenter);
@@ -321,12 +314,36 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     private void appendKeyRemappingCategory(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
+        //options.add(UiOptionItem.from("OK -> " + getContext().getString(R.string.player_toggle_speed),
+        //        option -> mPlayerData.setOKButtonBehavior(option.isSelected() ? PlayerData.OK_TOGGLE_SPEED : PlayerData.OK_ONLY_UI),
+        //        mPlayerData.getOKButtonBehavior() == PlayerData.OK_TOGGLE_SPEED));
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.player_quick_shorts_skip_alt),
+                option -> {
+                    mPlayerTweaksData.setQuickSkipShortsAltEnabled(option.isSelected());
+                    mGeneralData.resetDpadUpDownSettings();
+                },
+                mPlayerTweaksData.isQuickSkipShortsAltEnabled()));
+
         options.add(UiOptionItem.from(getContext().getString(R.string.player_quick_shorts_skip),
-                option -> mPlayerTweaksData.setQuickSkipShortsEnabled(option.isSelected()),
+                option -> {
+                    mPlayerTweaksData.setQuickSkipShortsEnabled(option.isSelected());
+                    mGeneralData.resetDpadLeftRightSettings();
+                },
                 mPlayerTweaksData.isQuickSkipShortsEnabled()));
 
+        options.add(UiOptionItem.from(getContext().getString(R.string.player_quick_skip_videos_alt),
+                option -> {
+                    mPlayerTweaksData.setQuickSkipVideosAltEnabled(option.isSelected());
+                    mGeneralData.resetDpadUpDownSettings();
+                },
+                mPlayerTweaksData.isQuickSkipVideosAltEnabled()));
+        
         options.add(UiOptionItem.from(getContext().getString(R.string.player_quick_skip_videos),
-                option -> mPlayerTweaksData.setQuickSkipVideosEnabled(option.isSelected()),
+                option -> {
+                    mPlayerTweaksData.setQuickSkipVideosEnabled(option.isSelected());
+                    mGeneralData.resetDpadLeftRightSettings();
+                },
                 mPlayerTweaksData.isQuickSkipVideosEnabled()));
 
         options.add(UiOptionItem.from("Play/Pause -> OK",
@@ -334,15 +351,24 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 mGeneralData.isRemapPlayToOKEnabled()));
 
         options.add(UiOptionItem.from("DPAD RIGHT/LEFT -> Volume Up/Down",
-                option -> mGeneralData.setRemapDpadLeftToVolumeEnabled(option.isSelected()),
+                option -> {
+                    mGeneralData.setRemapDpadLeftToVolumeEnabled(option.isSelected());
+                    mPlayerTweaksData.resetDpadLeftRightSettings();
+                },
                 mGeneralData.isRemapDpadLeftToVolumeEnabled()));
 
         options.add(UiOptionItem.from("DPAD UP/DOWN -> Volume Up/Down",
-                option -> mGeneralData.setRemapDpadUpToVolumeEnabled(option.isSelected()),
+                option -> {
+                    mGeneralData.setRemapDpadUpToVolumeEnabled(option.isSelected());
+                    mPlayerTweaksData.resetDpadUpDownSettings();
+                },
                 mGeneralData.isRemapDpadUpToVolumeEnabled()));
 
         options.add(UiOptionItem.from("DPAD UP/DOWN -> Speed Up/Down",
-                option -> mGeneralData.setRemapDpadUpDownToSpeedEnabled(option.isSelected()),
+                option -> {
+                    mGeneralData.setRemapDpadUpDownToSpeedEnabled(option.isSelected());
+                    mPlayerTweaksData.resetDpadUpDownSettings();
+                },
                 mGeneralData.isRemapDpadUpToSpeedEnabled()));
 
         options.add(UiOptionItem.from("Numbers 3/1 -> Speed Up/Down",
@@ -762,6 +788,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         menuNames.put(MainUIData.MENU_ITEM_RECENT_PLAYLIST, R.string.add_remove_from_recent_playlist);
         menuNames.put(MainUIData.MENU_ITEM_PLAY_VIDEO, R.string.play_video);
         menuNames.put(MainUIData.MENU_ITEM_PLAY_VIDEO_INCOGNITO, R.string.play_video_incognito);
+        menuNames.put(MainUIData.MENU_ITEM_PLAY_FROM_START, R.string.play_from_start);
         menuNames.put(MainUIData.MENU_ITEM_NOT_INTERESTED, R.string.not_interested);
         menuNames.put(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, R.string.not_recommend_channel);
         menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY, R.string.remove_from_history);
